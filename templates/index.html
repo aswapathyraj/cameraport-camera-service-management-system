@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Store Service Pro</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Updated Font Awesome CDN for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f5f5;
+            color: #0f2a24;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Slide-In Animation for Sidebar */
+        .slide-in {
+            animation: slideIn 0.6s ease-out forwards;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        /* Advanced Hover Animation for Sidebar Links */
+        .hover-advanced {
+            position: relative;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+        .hover-advanced::after {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 24px;
+            width: 0;
+            height: 2px;
+            background-color: #1a3c34;
+            transition: width 0.3s ease;
+        }
+        .hover-advanced:hover::after {
+            width: calc(100% - 48px);
+        }
+        .hover-advanced:hover {
+            background-color: #e8f0ed;
+        }
+        /* Icon Bounce Animation on Hover */
+        .hover-advanced .icon {
+            margin-right: 8px;
+            display: inline-block;
+        }
+        .hover-advanced:hover .icon {
+            animation: iconBounce 0.5s ease-in-out;
+        }
+        @keyframes iconBounce {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+            100% { transform: translateY(0); }
+        }
+        .float-hover:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+            transition: all 0.4s ease;
+        }
+        .btn {
+            transition: all 0.3s ease;
+            background-color: #1a3c34;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #ffffff;
+        }
+        .btn:hover {
+            background-color: #2e5c52;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 60, 52, 0.3);
+        }
+        /* Header */
+        .header {
+            background: #ffffff;
+            color: #0f2a24;
+            padding: 18px 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 500;
+        }
+        .header button {
+            background: #d32f2f;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .header button:hover {
+            background: #b71c1c;
+        }
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: #ffffff;
+            color: #0f2a24;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            padding-top: 24px;
+            box-shadow: 2px 0 16px rgba(0, 0, 0, 0.05);
+            z-index: 900;
+            overflow-y: auto;
+        }
+        .sidebar a {
+            display: block;
+            padding: 16px 24px;
+            color: #204a41;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 400;
+            transition: all 0.3s ease;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: #a8d5ba;
+            color: #1a3c34;
+            font-weight: 500;
+        }
+        .sidebar a.super-admin-link {
+            font-weight: 500;
+            color: #388e3c;
+        }
+        /* Main Content */
+        .main-content {
+            margin-top: 64px;
+            padding: 24px;
+            flex: 1;
+            overflow-y: auto;
+            min-height: calc(100vh - 64px);
+        }
+        .main-content.with-sidebar {
+            margin-left: 240px;
+        }
+        /* Login Section */
+        .login-section {
+            max-width: 420px;
+            margin: 120px auto;
+            background: #ffffff;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+        .login-section h2 {
+            font-size: 22px;
+            margin-bottom: 24px;
+            color: #0f2a24;
+            font-weight: 500;
+        }
+        .login-section label {
+            display: block;
+            margin: 12px 0 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #204a41;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .login-section input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #d1e6da;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .login-section input:focus {
+            border-color: #1a3c34;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 60, 52, 0.2);
+        }
+        .login-section button {
+            background: #1a3c34;
+            color: #ffffff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .login-section button:hover {
+            background: #2e5c52;
+        }
+        /* Dashboard Section */
+        .dashboard-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .dashboard-header {
+            background: #ffffff;
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+        .dashboard-header h2 {
+            font-size: 22px;
+            color: #0f2a24;
+            font-weight: 500;
+        }
+        .dashboard-header p {
+            font-size: 14px;
+            color: #204a41;
+            font-weight: 300;
+        }
+        .overview {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .metric-card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-3px);
+        }
+        .metric-card h3 {
+            font-size: 14px;
+            color: #204a41;
+            margin-bottom: 12px;
+            font-weight: 400;
+        }
+        .metric-card p {
+            font-size: 28px;
+            font-weight: 500;
+            color: #0f2a24;
+        }
+        .chart-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            height: 320px;
+        }
+        .chart-container canvas {
+            max-height: 100%;
+            width: 100%;
+        }
+        .quick-actions {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .quick-actions button {
+            background: #1a3c34;
+            color: #ffffff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .quick-actions button:hover {
+            background: #2e5c52;
+        }
+        .recent-activity {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+        .recent-activity h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #0f2a24;
+            font-weight: 500;
+        }
+        /* Form Section */
+        .form-section {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+        }
+        .form-section h2 {
+            font-size: 20px;
+            margin-bottom: 24px;
+            color: #0f2a24;
+            font-weight: 500;
+        }
+        .form-section label {
+            display: block;
+            margin: 12px 0 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #204a41;
+        }
+        .form-section input, .form-section select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #d1e6da;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .form-section input:focus, .form-section select:focus {
+            border-color: #1a3c34;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 60, 52, 0.2);
+        }
+        .form-section button {
+            background: #1a3c34;
+            color: #ffffff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .form-section button:hover {
+            background: #2e5c52;
+        }
+        .form-section .cancel-button {
+            background: #d32f2f;
+            margin-left: 12px;
+        }
+        .form-section .cancel-button:hover {
+            background: #b71c1c;
+        }
+        .csv-upload-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #d1e6da;
+        }
+        .csv-upload-section label {
+            margin-bottom: 12px;
+        }
+        .csv-upload-section input[type="file"] {
+            margin-bottom: 16px;
+        }
+        .csv-upload-section p {
+            font-size: 13px;
+            color: #204a41;
+            margin-bottom: 12px;
+            font-weight: 300;
+        }
+        .csv-upload-section .error {
+            color: #d32f2f;
+        }
+        .csv-upload-section .success {
+            color: #388e3c;
+        }
+        /* Search Section */
+        .search-section {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+        .search-section input, .search-section select {
+            padding: 12px;
+            border: 1px solid #d1e6da;
+            border-radius: 8px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 220px;
+            transition: all 0.3s ease;
+        }
+        .search-section input:focus, .search-section select:focus {
+            border-color: #1a3c34;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 60, 52, 0.2);
+        }
+        .search-section button {
+            background: #1a3c34;
+            color: #ffffff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .search-section button:hover {
+            background: #2e5c52;
+        }
+        .delete-selected-button {
+            background: #d32f2f;
+        }
+        .delete-selected-button:hover {
+            background: #b71c1c;
+        }
+        .export-button {
+            background: #388e3c;
+        }
+        .export-button:hover {
+            background: #2e7031;
+        }
+        /* Table Section */
+        .table-section {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #d1e6da;
+            font-size: 14px;
+        }
+        th {
+            background: #a8d5ba;
+            color: #1a3c34;
+            font-weight: 500;
+        }
+        th.sorted-desc::after {
+            content: ' ↓';
+        }
+        tr:nth-child(even) {
+            background: #e8f0ed;
+        }
+        tr:hover {
+            background: #a8d5ba;
+        }
+        .action-button, .invoice-button {
+            background: #1a3c34;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            line-height: 1;
+        }
+        .action-button:hover, .invoice-button:hover {
+            background: #2e5c52;
+        }
+        .invoice-button {
+            background: #388e3c;
+        }
+        .invoice-button:hover {
+            background: #2e7031;
+        }
+        /* Stack action buttons vertically */
+        .action-buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-start;
+        }
+        /* Messages */
+        .error {
+            color: #d32f2f;
+            font-size: 13px;
+            margin-top: 6px;
+            font-weight: 400;
+        }
+        .success {
+            color: #388e3c;
+            font-size: 13px;
+            margin-top: 6px;
+            font-weight: 400;
+        }
+        .hidden {
+            display: none;
+        }
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .overview {
+                grid-template-columns: 1fr;
+            }
+            .chart-container {
+                height: 280px;
+            }
+            .sidebar {
+                width: 200px;
+            }
+            .main-content.with-sidebar {
+                margin-left: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header fade-in">
+        <h1>CAMERA PORT</h1>
+        <button id="logoutBtn" class="hidden">Logout</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Login Section -->
+        <div id="loginSection" class="login-section fade-in">
+            <h2>Admin Login</h2>
+            <form id="loginForm">
+                <label for="username">Username</label>
+                <input type="text" id="username" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+                <button type="submit" class="btn">Login</button>
+            </form>
+            <p id="loginError" class="error"></p>
+        </div>
+
+        <!-- Main App (Hidden until login) -->
+        <div id="appContent" class="hidden">
+            <!-- Sidebar -->
+            <div class="sidebar slide-in">
+                <a href="#" class="nav-link active hover-advanced" data-section="dashboard">Dashboard</a>
+                <a href="#" class="nav-link hover-advanced" data-section="add-record">Add Record</a>
+                <a href="#" class="nav-link hover-advanced" data-section="view-records">View Records</a>
+                <a href="#" class="nav-link hover-advanced" data-section="edit-record" style="display: none;">Edit Record</a>
+                <a href="#" class="nav-link hover-advanced" data-section="super-admin-edit-record" style="display: none;">Super Admin Edit Record</a>
+                <a href="#" class="nav-link super-admin-link hover-advanced" data-section="super-admin-panel" id="superAdminLink" style="display: none;">
+                    <i class="fas fa-user-shield icon"></i> Super Admin Panel
+                </a>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="dashboard-section fade-in">
+                <div class="dashboard-header">
+                    <h2>Welcome, <span id="adminUsername">Admin</span> (<span id="adminRole">Role</span>)!</h2>
+                    <p>Here's an overview of your camera service operations.</p>
+                </div>
+                <div class="overview">
+                    <div class="metrics">
+                        <div class="metric-card float-hover">
+                            <h3>Total Records</h3>
+                            <p id="totalRecords">0</p>
+                        </div>
+                        <div class="metric-card float-hover">
+                            <h3>Received</h3>
+                            <p id="receivedCount">0</p>
+                        </div>
+                        <div class="metric-card float-hover">
+                            <h3>In Diagnosis</h3>
+                            <p id="inDiagnosisCount">0</p>
+                        </div>
+                        <div class="metric-card float-hover">
+                            <h3>Under Repair</h3>
+                            <p id="underRepairCount">0</p>
+                        </div>
+                        <div class="metric-card float-hover">
+                            <h3>Ready</h3>
+                            <p id="readyCount">0</p>
+                        </div>
+                        <div class="metric-card float-hover">
+                            <h3>Delivered</h3>
+                            <p id="deliveredCount">0</p>
+                        </div>
+                    </div>
+                    <div class="chart-container float-hover">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+                <div class="quick-actions">
+                    <button class="btn" onclick="navigateTo('add-record')">Add New Record</button>
+                    <button class="btn" onclick="navigateTo('view-records')">View All Records</button>
+                </div>
+                <div class="recent-activity float-hover">
+                    <h2>Recent Activity</h2>
+                    <div class="table-section">
+                        <table id="recentActivityTable">
+                            <thead>
+                                <tr>
+                                    <th>Customer Name</th>
+                                    <th>Camera Model</th>
+                                    <th>Serial Number</th>
+                                    <th>Issue</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentActivityBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Record Section -->
+            <div id="add-record" class="form-section hidden fade-in">
+                <h2>Add Service Record</h2>
+                <form id="serviceForm">
+                    <label for="customerName">Customer Name</label>
+                    <input type="text" id="customerName" required pattern="[A-Za-z\s]{2,50}" title="Name must be 2-50 characters, letters and spaces only">
+
+                    <label for="customerEmail">Customer Email</label>
+                    <input type="email" id="customerEmail" required>
+
+                    <label for="customerPhone">Phone Number</label>
+                    <input type="tel" id="customerPhone" required pattern="[0-9]{10,15}" title="Phone number must be 10-15 digits">
+
+                    <label for="cameraBrand">Camera Brand</label>
+                    <input type="text" id="cameraBrand" required pattern="[A-Za-z0-9\s]{2,50}" title="Brand must be 2-50 characters">
+
+                    <label for="cameraModel">Camera Model</label>
+                    <input type="text" id="cameraModel" required pattern="[A-Za-z0-9\s\-]{2,50}" title="Model must be 2-50 characters, letters, numbers, spaces, or hyphens">
+
+                    <label for="serialNumber">Serial Number</label>
+                    <input type="text" id="serialNumber" required pattern="[A-Za-z0-9\-]{5,20}" title="Serial number must be 5-20 alphanumeric characters or hyphens">
+
+                    <label for="serviceIssue">Service Issue</label>
+                    <input type="text" id="serviceIssue" required minlength="10" maxlength="200" title="Issue must be 10-200 characters">
+
+                    <label for="receivedDate">Received Date</label>
+                    <input type="date" id="receivedDate" required max="9999-12-31">
+
+                    <label for="deliveryDate">Delivery Date</label>
+                    <input type="date" id="deliveryDate" max="9999-12-31">
+
+                    <label for="status">Status</label>
+                    <select id="status" required>
+                        <option value="Received">Received</option>
+                        <option value="In Diagnosis">In Diagnosis</option>
+                        <option value="Under Repair">Under Repair</option>
+                        <option value="Ready">Ready</option>
+                        <option value="Delivered">Delivered</option>
+                    </select>
+
+                    <label for="totalAmount">Total Amount (Optional)</label>
+                    <input type="number" id="totalAmount" step="0.01" min="0" placeholder="0.00">
+
+                    <label for="amountPaid">Amount Paid (Optional)</label>
+                    <input type="number" id="amountPaid" step="0.01" min="0" placeholder="0.00">
+
+                    <button type="submit" class="btn">Add Record</button>
+                </form>
+                <p id="formError" class="error"></p>
+                <p id="formSuccess" class="success"></p>
+
+                <!-- CSV Upload Section -->
+                <div class="csv-upload-section">
+                    <h2>Upload Records via CSV</h2>
+                    <p>CSV must include headers: Customer ID, Customer Name, Email, Phone Number, Camera Brand, Camera Model, Serial Number, Service Issue, Received Date, Delivery Date, Status, Total Amount, Amount Paid. Required fields are Customer Name, Email, Phone Number, Camera Brand, Camera Model, Serial Number, Service Issue, Received Date, Status.</p>
+                    <p><a href="#" id="downloadSampleCsv">Download Sample CSV</a></p>
+                    <form id="csvUploadForm" enctype="multipart/form-data">
+                        <label for="csvFile">Select CSV File</label>
+                        <input type="file" id="csvFile" accept=".csv" required>
+                        <button type="submit" class="btn">Upload CSV</button>
+                    </form>
+                    <p id="csvUploadError" class="error"></p>
+                    <p id="csvUploadSuccess" class="success"></p>
+                </div>
+            </div>
+
+            <!-- View Records Section -->
+            <div id="view-records" class="hidden fade-in">
+                <!-- Search and Filter Section -->
+                <div class="search-section float-hover">
+                    <input type="text" id="searchName" placeholder="Search by Customer Name">
+                    <input type="text" id="searchSerial" placeholder="Search by Serial Number">
+                    <input type="tel" id="searchPhone" placeholder="Search by Phone Number">
+                    <select id="filterStatus">
+                        <option value="">All Statuses</option>
+                        <option value="Received">Received</option>
+                        <option value="In Diagnosis">In Diagnosis</option>
+                        <option value="Under Repair">Under Repair</option>
+                        <option value="Ready">Ready</option>
+                        <option value="Delivered">Delivered</option>
+                    </select>
+                    <select id="filterAdmin" class="hidden" data-super-admin-only>
+                        <option value="">All Admins</option>
+                    </select>
+                    <button class="btn" onclick="fetchRecords()">Search</button>
+                    <button class="delete-selected-button btn" onclick="deleteSelected()">Delete Selected</button>
+                    <button class="export-button btn" onclick="exportToCSV()">Export to CSV</button>
+                </div>
+
+                <!-- Table Section -->
+                <div class="table-section float-hover">
+                    <table id="serviceTable">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
+                                <th>Customer ID</th>
+                                <th>Customer Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Camera Brand</th>
+                                <th>Camera Model</th>
+                                <th>Serial Number</th>
+                                <th>Issue</th>
+                                <th class="sorted-desc">Received Date</th>
+                                <th>Delivery Date</th>
+                                <th>Status</th>
+                                <th>Total Amount</th>
+                                <th>Amount Paid</th>
+                                <th data-super-admin-only>Created By</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="serviceTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Edit Record Section (Regular Admin) -->
+            <div id="edit-record" class="form-section hidden fade-in">
+                <h2>Edit Service Record</h2>
+                <form id="editServiceForm">
+                    <input type="hidden" id="editRecordId">
+                    <label for="editCustomerName">Customer Name</label>
+                    <input type="text" id="editCustomerName" required pattern="[A-Za-z\s]{2,50}" title="Name must be 2-50 characters, letters and spaces only">
+
+                    <label for="editCustomerEmail">Customer Email</label>
+                    <input type="email" id="editCustomerEmail" required>
+
+                    <label for="editPhoneNumber">Phone Number</label>
+                    <input type="tel" id="editPhoneNumber" required pattern="[0-9]{10,15}" title="Phone number must be 10-15 digits">
+
+                    <label for="editCameraBrand">Camera Brand</label>
+                    <input type="text" id="editCameraBrand" required pattern="[A-Za-z0-9\s]{2,50}" title="Brand must be 2-50 characters">
+
+                    <label for="editCameraModel">Camera Model</label>
+                    <input type="text" id="editCameraModel" required pattern="[A-Za-z0-9\s\-]{2,50}" title="Model must be 2-50 characters, letters, numbers, spaces, or hyphens">
+
+                    <label for="editSerialNumber">Serial Number</label>
+                    <input type="text" id="editSerialNumber" required pattern="[A-Za-z0-9\-]{5,20}" title="Serial number must be 5-20 alphanumeric characters or hyphens">
+
+                    <label for="editStatus">Status</label>
+                    <select id="editStatus" required>
+                        <option value="Received">Received</option>
+                        <option value="In Diagnosis">In Diagnosis</option>
+                        <option value="Under Repair">Under Repair</option>
+                        <option value="Ready">Ready</option>
+                        <option value="Delivered">Delivered</option>
+                    </select>
+
+                    <button type="submit" class="btn">Update Record</button>
+                    <button type="button" class="cancel-button btn" onclick="navigateTo('view-records')">Cancel</button>
+                </form>
+                <p id="editFormError" class="error"></p>
+                <p id="editFormSuccess" class="success"></p>
+            </div>
+
+            <!-- Super Admin Edit Record Section -->
+            <div id="super-admin-edit-record" class="form-section hidden fade-in">
+                <h2>Edit Service Record (Super Admin)</h2>
+                <form id="superAdminEditServiceForm">
+                    <input type "hidden" id="superAdminEditRecordId">
+                    <label for="superAdminCustomerName">Customer Name</label>
+                    <input type="text" id="superAdminCustomerName" required pattern="[A-Za-z\s]{2,50}" title="Name must be 2-50 characters, letters and spaces only">
+
+                    <label for="superAdminCustomerEmail">Customer Email</label>
+                    <input type="email" id="superAdminCustomerEmail" required>
+
+                    <label for="superAdminPhoneNumber">Phone Number</label>
+                    <input type="tel" id="superAdminPhoneNumber" required pattern="[0-9]{10,15}" title="Phone number must be 10-15 digits">
+
+                    <label for="superAdminCameraBrand">Camera Brand</label>
+                    <input type="text" id="superAdminCameraBrand" required pattern="[A-Za-z0-9\s]{2,50}" title="Brand must be 2-50 characters">
+
+                    <label for="superAdminCameraModel">Camera Model</label>
+                    <input type="text" id="superAdminCameraModel" required pattern="[A-Za-z0-9\s\-]{2,50}" title="Model must be 2-50 characters, letters, numbers, spaces, or hyphens">
+
+                    <label for="superAdminSerialNumber">Serial Number</label>
+                    <input type="text" id="superAdminSerialNumber" required pattern="[A-Za-z0-9\-]{5,20}" title="Serial number must be 5-20 alphanumeric characters or hyphens">
+
+                    <label for="superAdminServiceIssue">Service Issue</label>
+                    <input type="text" id="superAdminServiceIssue" required minlength="10" maxlength="200" title="Issue must be 10-200 characters">
+
+                    <label for="superAdminReceivedDate">Received Date</label>
+                    <input type="date" id="superAdminReceivedDate" required max="9999-12-31">
+
+                    <label for="superAdminDeliveryDate">Delivery Date</label>
+                    <input type="date" id="superAdminDeliveryDate" max="9999-12-31">
+
+                    <label for="superAdminStatus">Status</label>
+                    <select id="superAdminStatus" required>
+                        <option value="Received">Received</option>
+                        <option value="In Diagnosis">In Diagnosis</option>
+                        <option value="Under Repair">Under Repair</option>
+                        <option value="Ready">Ready</option>
+                        <option value="Delivered">Delivered</option>
+                    </select>
+
+                    <label for="superAdminTotalAmount">Total Amount</label>
+                    <input type="number" id="superAdminTotalAmount" step="0.01" min="0" placeholder="0.00">
+
+                    <label for="superAdminAmountPaid">Amount Paid</label>
+                    <input type="number" id="superAdminAmountPaid" step="0.01" min="0" placeholder="0.00">
+
+                    <button type="submit" class="btn">Update Record</button>
+                    <button type="button" class="cancel-button btn" onclick="navigateTo('view-records')">Cancel</button>
+                </form>
+                <p id="superAdminEditFormError" class="error"></p>
+                <p id="superAdminEditFormSuccess" class="success"></p>
+            </div>
+
+            <!-- Super Admin Panel Section -->
+            <div id="super-admin-panel" class="hidden fade-in">
+                <!-- Create Admin Form -->
+                <div class="form-section float-hover">
+                    <h2>Create New Admin</h2>
+                    <form id="createAdminForm">
+                        <label for="newAdminUsername">Username</label>
+                        <input type="text" id="newAdminUsername" required pattern="[A-Za-z0-9]{3,20}" title="Username must be 3-20 alphanumeric characters">
+
+                        <label for="newAdminPassword">Password</label>
+                        <input type="password" id="newAdminPassword" required minlength="8" title="Password must be at least 8 characters">
+
+                        <button type="submit" class="btn">Create Admin</button>
+                    </form>
+                    <p id="createAdminError" class="error"></p>
+                    <p id="createAdminSuccess" class="success"></p>
+                </div>
+
+                <!-- Admin List -->
+                <div class="table-section float-hover">
+                    <h2>Admin Accounts</h2>
+                    <table id="adminTable">
+                        <thead>
+                            <tr>
+                                <th>Admin ID</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Created At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Edit Admin Form -->
+                <div class="form-section float-hover" id="editAdminSection" style="display: none;">
+                    <h2>Edit Admin</h2>
+                    <form id="editAdminForm">
+                        <input type="hidden" id="editAdminId">
+                        <label for="editAdminUsername">Username</label>
+                        <input type="text" id="editAdminUsername" required pattern="[A-Za-z0-9]{3,20}" title="Username must be 3-20 alphanumeric characters">
+
+                        <label for="editAdminPassword">Password</label>
+                        <input type="password" id="editAdminPassword" required minlength="8" title="Password must be at least 8 characters">
+
+                        <button type="submit" class="btn">Update Admin</button>
+                        <button type="button" class="cancel-button btn" onclick="cancelEditAdmin()">Cancel</button>
+                    </form>
+                    <p id="editAdminError" class="error"></p>
+                    <p id="editAdminSuccess" class="success"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sidebar navigation
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('#dashboard, #add-record, #view-records, #edit-record, #super-admin-edit-record, #super-admin-panel');
+        const mainContent = document.getElementById('mainContent');
+        let statusChart = null;
+        let currentRole = 'admin'; // Default role, updated on login
+        let admins = []; // Store list of admins for Super Admin
+
+        function navigateTo(sectionId) {
+            navLinks.forEach(link => link.classList.remove('active'));
+            sections.forEach(section => section.classList.add('hidden'));
+            document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
+            document.getElementById(sectionId).classList.remove('hidden');
+            if (sectionId === 'view-records') {
+                fetchRecords();
+            } else if (sectionId === 'dashboard') {
+                fetchDashboardData();
+            } else if (sectionId === 'super-admin-panel') {
+                fetchAdmins();
+            }
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const sectionId = link.getAttribute('data-section');
+                navigateTo(sectionId);
+            });
+        });
+
+        // Fetch and populate admins for dropdown (Super Admin only)
+        async function fetchAdminsForDropdown() {
+            if (currentRole !== 'super_admin') return;
+            try {
+                const response = await fetch('/api/admins');
+                if (response.ok) {
+                    admins = await response.json();
+                    const adminSelect = document.getElementById('filterAdmin');
+                    adminSelect.innerHTML = '<option value="">All Admins</option>';
+                    admins.forEach(admin => {
+                        const option = document.createElement('option');
+                        option.value = admin.username;
+                        option.textContent = admin.username;
+                        adminSelect.appendChild(option);
+                    });
+                } else {
+                    console.error('Failed to fetch admins');
+                }
+            } catch (error) {
+                console.error('Error fetching admins:', error);
+            }
+        }
+
+        // Fetch dashboard data and render chart
+        async function fetchDashboardData() {
+            // For super admins, optionally filter by admin if selected
+            const filterAdmin = currentRole === 'super_admin' ? document.getElementById('filterAdmin').value : '';
+            const query = filterAdmin ? `/api/dashboard?admin=${encodeURIComponent(filterAdmin)}` : '/api/dashboard';
+            const response = await fetch(query);
+            const data = await response.json();
+
+            // Update metric cards
+            document.getElementById('totalRecords').textContent = data.total_records;
+            document.getElementById('receivedCount').textContent = data.status_counts.Received || 0;
+            document.getElementById('inDiagnosisCount').textContent = data.status_counts['In Diagnosis'] || 0;
+            document.getElementById('underRepairCount').textContent = data.status_counts['Under Repair'] || 0;
+            document.getElementById('readyCount').textContent = data.status_counts.Ready || 0;
+            document.getElementById('deliveredCount').textContent = data.status_counts.Delivered || 0;
+
+            // Update recent activity table
+            const recentBody = document.getElementById('recentActivityBody');
+            recentBody.innerHTML = '';
+            data.recent_records.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.customer_name}</td>
+                    <td>${record.camera_model}</td>
+                    <td>${record.serial_number}</td>
+                    <td>${record.service_issue}</td>
+                    <td>${record.status}</td>
+                `;
+                recentBody.appendChild(row);
+            });
+
+            // Render status chart
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            const statusData = [
+                data.status_counts.Received || 0,
+                data.status_counts['In Diagnosis'] || 0,
+                data.status_counts['Under Repair'] || 0,
+                data.status_counts.Ready || 0,
+                data.status_counts.Delivered || 0
+            ];
+
+            // Destroy existing chart if it exists
+            if (statusChart) {
+                statusChart.destroy();
+            }
+
+            statusChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Received', 'In Diagnosis', 'Under Repair', 'Ready', 'Delivered'],
+                    datasets: [{
+                        data: statusData,
+                        backgroundColor: [
+                            '#1a3c34',
+                            '#2e5c52',
+                            '#a8d5ba',
+                            '#d1e6da',
+                            '#84c4a3'
+                        ],
+                        borderWidth: 1,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'Poppins',
+                                    size: 13,
+                                    weight: '400'
+                                },
+                                color: '#204a41'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Status Distribution',
+                            font: {
+                                family: 'Poppins',
+                                size: 16,
+                                weight: '500'
+                            },
+                            color: '#0f2a24',
+                            padding: {
+                                bottom: 24
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Check login status
+        async function checkLogin() {
+            const response = await fetch('/api/check_session');
+            const data = await response.json();
+            if (data.logged_in) {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('appContent').classList.remove('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                mainContent.classList.add('with-sidebar');
+                document.getElementById('adminUsername').textContent = data.username;
+                document.getElementById('adminRole').textContent = data.role === 'super_admin' ? 'Superadmin' : 'Admin';
+                currentRole = data.role; // Update current role
+                // Show Super Admin link and admin filter if role is super_admin
+                if (data.role === 'super_admin') {
+                    document.getElementById('superAdminLink').style.display = 'block';
+                    document.getElementById('filterAdmin').classList.remove('hidden');
+                    document.querySelectorAll('[data-super-admin-only]').forEach(el => el.style.display = '');
+                    fetchAdminsForDropdown();
+                } else {
+                    document.getElementById('filterAdmin').classList.add('hidden');
+                    document.querySelectorAll('[data-super-admin-only]').forEach(el => el.style.display = 'none');
+                }
+                navigateTo('dashboard');
+            } else {
+                document.getElementById('loginSection').classList.remove('hidden');
+                document.getElementById('appContent').classList.add('hidden');
+                document.getElementById('logoutBtn').classList.add('hidden');
+                mainContent.classList.remove('with-sidebar');
+                document.getElementById('superAdminLink').style.display = 'none';
+                currentRole = 'admin'; // Reset role
+                document.getElementById('filterAdmin').classList.add('hidden');
+                document.querySelectorAll('[data-super-admin-only]').forEach(el => el.style.display = 'none');
+            }
+        }
+
+        // Handle login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginError = document.getElementById('loginError');
+            loginError.textContent = '';
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    sessionStorage.setItem('username', username);
+                    checkLogin();
+                } else {
+                    loginError.textContent = data.message || 'Invalid username or password';
+                }
+            } catch (error) {
+                loginError.textContent = 'Network error. Please try again.';
+            }
+        });
+
+        // Handle logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to logout?')) {
+                await fetch('/api/logout', { method: 'POST' });
+                sessionStorage.removeItem('username');
+                checkLogin();
+            }
+        });
+
+        // Download invoice
+        function downloadInvoice(recordId) {
+            window.location.href = `/api/records/${recordId}/invoice`;
+        }
+
+        // Fetch and display records
+        async function fetchRecords() {
+            const searchName = document.getElementById('searchName').value;
+            const searchSerial = document.getElementById('searchSerial').value;
+            const searchPhone = document.getElementById('searchPhone').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+            const filterAdmin = currentRole === 'super_admin' ? document.getElementById('filterAdmin').value : '';
+            const query = `/api/records?name=${encodeURIComponent(searchName)}&serial=${encodeURIComponent(searchSerial)}&phone=${encodeURIComponent(searchPhone)}&status=${encodeURIComponent(filterStatus)}${filterAdmin ? `&admin=${encodeURIComponent(filterAdmin)}` : ''}`;
+            const response = await fetch(query);
+            let records = await response.json();
+
+            // Sort records by received_date in descending order (newest first)
+            records.sort((a, b) => new Date(b.received_date) - new Date(a.received_date));
+
+            const tableBody = document.getElementById('serviceTableBody');
+            tableBody.innerHTML = '';
+            records.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="checkbox" class="selectRow" value="${record.id}"></td>
+                    <td>${record.customer_id}</td>
+                    <td>${record.customer_name}</td>
+                    <td>${record.customer_email}</td>
+                    <td>${record.phone_number}</td>
+                    <td>${record.camera_brand}</td>
+                    <td>${record.camera_model}</td>
+                    <td>${record.serial_number}</td>
+                    <td>${record.service_issue}</td>
+                    <td>${record.received_date}</td>
+                    <td>${record.delivery_date || '-'}</td>
+                    <td>${record.status}</td>
+                    <td>${record.total_amount ? record.total_amount.toFixed(2) : '0.00'}</td>
+                    <td>${record.amount_paid ? record.amount_paid.toFixed(2) : '0.00'}</td>
+                    ${currentRole === 'super_admin' ? `<td>${record.admin_username || '-'}</td>` : ''}
+                    <td>
+                        <div class="action-buttons-container">
+                            <div>
+                                <button class="action-button" onclick='editRecord(${JSON.stringify(record)})' aria-label="Edit Record">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button class="invoice-button" onclick='downloadInvoice(${record.id})' aria-label="Download Invoice">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            // Reset "Select All" checkbox after fetching records
+            document.getElementById('selectAll').checked = false;
+        }
+
+        // Toggle Select All checkboxes
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const rowCheckboxes = document.querySelectorAll('.selectRow');
+            rowCheckboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        }
+
+        // Delete selected records
+        async function deleteSelected() {
+            const selectedCheckboxes = document.querySelectorAll('.selectRow:checked');
+            if (selectedCheckboxes.length === 0) {
+                alert('Please select at least one record to delete.');
+                return;
+            }
+
+            const recordIds = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+
+            try {
+                const response = await fetch('/api/records/bulk_delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ record_ids: recordIds })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert('Selected records deleted successfully!');
+                    fetchRecords(); // Refresh the table
+                    fetchDashboardData(); // Update dashboard metrics
+                    document.getElementById('selectAll').checked = false; // Uncheck "Select All"
+                } else {
+                    alert(data.message || 'Error deleting records. Please try again.');
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        }
+
+        // Edit record
+        function editRecord(record) {
+            if (currentRole === 'super_admin') {
+                // Populate Super Admin edit form
+                document.getElementById('superAdminEditRecordId').value = record.id;
+                document.getElementById('superAdminCustomerName').value = record.customer_name;
+                document.getElementById('superAdminCustomerEmail').value = record.customer_email;
+                document.getElementById('superAdminPhoneNumber').value = record.phone_number;
+                document.getElementById('superAdminCameraBrand').value = record.camera_brand;
+                document.getElementById('superAdminCameraModel').value = record.camera_model;
+                document.getElementById('superAdminSerialNumber').value = record.serial_number;
+                document.getElementById('superAdminServiceIssue').value = record.service_issue;
+                document.getElementById('superAdminReceivedDate').value = record.received_date;
+                document.getElementById('superAdminDeliveryDate').value = record.delivery_date || '';
+                document.getElementById('superAdminStatus').value = record.status;
+                document.getElementById('superAdminTotalAmount').value = record.total_amount ? record.total_amount.toFixed(2) : '';
+                document.getElementById('superAdminAmountPaid').value = record.amount_paid ? record.amount_paid.toFixed(2) : '';
+                navigateTo('super-admin-edit-record');
+            } else {
+                // Populate regular admin edit form
+                document.getElementById('editRecordId').value = record.id;
+                document.getElementById('editCustomerName').value = record.customer_name;
+                document.getElementById('editCustomerEmail').value = record.customer_email;
+                document.getElementById('editPhoneNumber').value = record.phone_number;
+                document.getElementById('editCameraBrand').value = record.camera_brand;
+                document.getElementById('editCameraModel').value = record.camera_model;
+                document.getElementById('editSerialNumber').value = record.serial_number;
+                document.getElementById('editStatus').value = record.status;
+                navigateTo('edit-record');
+            }
+        }
+
+        // Handle edit form submission (Regular Admin)
+        document.getElementById('editServiceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formError = document.getElementById('editFormError');
+            const formSuccess = document.getElementById('editFormSuccess');
+            formError.textContent = '';
+            formSuccess.textContent = '';
+
+            const recordId = document.getElementById('editRecordId').value;
+            const record = {
+                customer_name: document.getElementById('editCustomerName').value,
+                customer_email: document.getElementById('editCustomerEmail').value,
+                phone_number: document.getElementById('editPhoneNumber').value,
+                camera_brand: document.getElementById('editCameraBrand').value,
+                camera_model: document.getElementById('editCameraModel').value,
+                serial_number: document.getElementById('editSerialNumber').value,
+                status: document.getElementById('editStatus').value
+            };
+
+            console.log('Submitting edit record (regular admin):', record);
+
+            try {
+                const response = await fetch(`/api/records/${recordId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(record)
+                });
+
+                console.log('Edit response status:', response.status);
+                const data = await response.json();
+                console.log('Edit response data:', data);
+
+                if (response.ok) {
+                    formSuccess.textContent = 'Service record updated successfully!';
+                    fetchRecords();
+                    fetchDashboardData();
+                    setTimeout(() => navigateTo('view-records'), 1000);
+                } else {
+                    formError.textContent = data.message || 'Error updating record. Please check your input and try again.';
+                    console.error('Edit error response:', data);
+                }
+            } catch (error) {
+                console.error('Edit network error:', error);
+                formError.textContent = 'Network error. Please try again.';
+            }
+        });
+
+        // Handle edit form submission (Super Admin)
+        document.getElementById('superAdminEditServiceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formError = document.getElementById('superAdminEditFormError');
+            const formSuccess = document.getElementById('superAdminEditFormSuccess');
+            formError.textContent = '';
+            formSuccess.textContent = '';
+
+            const receivedDateValue = document.getElementById('superAdminReceivedDate').value;
+            if (!receivedDateValue) {
+                formError.textContent = 'Received Date is required.';
+                return;
+            }
+
+            const deliveryDateValue = document.getElementById('superAdminDeliveryDate').value;
+            if (deliveryDateValue) {
+                const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                if (!dateRegex.test(deliveryDateValue)) {
+                    formError.textContent = 'Invalid Delivery Date format. Use YYYY-MM-DD';
+                    return;
+                }
+            }
+
+            const totalAmountValue = document.getElementById('superAdminTotalAmount').value;
+            if (totalAmountValue && totalAmountValue < 0) {
+                formError.textContent = 'Total Amount cannot be negative.';
+                return;
+            }
+
+            const amountPaidValue = document.getElementById('superAdminAmountPaid').value;
+            if (amountPaidValue && amountPaidValue < 0) {
+                formError.textContent = 'Amount Paid cannot be negative.';
+                return;
+            }
+
+            const recordId = document.getElementById('superAdminEditRecordId').value;
+            const record = {
+                customer_name: document.getElementById('superAdminCustomerName').value,
+                customer_email: document.getElementById('superAdminCustomerEmail').value,
+                phone_number: document.getElementById('superAdminPhoneNumber').value,
+                camera_brand: document.getElementById('superAdminCameraBrand').value,
+                camera_model: document.getElementById('superAdminCameraModel').value,
+                serial_number: document.getElementById('superAdminSerialNumber').value,
+                service_issue: document.getElementById('superAdminServiceIssue').value,
+                received_date: receivedDateValue,
+                delivery_date: deliveryDateValue || null,
+                status: document.getElementById('superAdminStatus').value,
+                total_amount: totalAmountValue || 0,
+                amount_paid: amountPaidValue || 0
+            };
+
+            console.log('Submitting edit record (super admin):', record);
+
+            try {
+                const response = await fetch(`/api/records/${recordId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(record)
+                });
+
+                console.log('Super Admin edit response status:', response.status);
+                const data = await response.json();
+                console.log('Super Admin edit response data:', data);
+
+                if (response.ok) {
+                    formSuccess.textContent = 'Service record updated successfully!';
+                    fetchRecords();
+                    fetchDashboardData();
+                    setTimeout(() => navigateTo('view-records'), 1000);
+                } else {
+                    formError.textContent = data.message || 'Error updating record. Please check your input and try again.';
+                    console.error('Super Admin edit error response:', data);
+                }
+            } catch (error) {
+                console.error('Super Admin edit network error:', error);
+                formError.textContent = 'Network error. Please try again.';
+            }
+        });
+
+        // Handle form submission (Add Record)
+        document.getElementById('serviceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formError = document.getElementById('formError');
+            const formSuccess = document.getElementById('formSuccess');
+            formError.textContent = '';
+            formSuccess.textContent = '';
+
+            const receivedDateValue = document.getElementById('receivedDate').value;
+            if (!receivedDateValue) {
+                formError.textContent = 'Received Date is required.';
+                return;
+            }
+
+            const deliveryDateValue = document.getElementById('deliveryDate').value;
+            if (deliveryDateValue) {
+                const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                if (!dateRegex.test(deliveryDateValue)) {
+                    formError.textContent = 'Invalid Delivery Date format. Use YYYY-MM-DD';
+                    return;
+                }
+            }
+
+            const totalAmountValue = document.getElementById('totalAmount').value;
+            if (totalAmountValue && totalAmountValue < 0) {
+                formError.textContent = 'Total Amount cannot be negative.';
+                return;
+            }
+
+            const amountPaidValue = document.getElementById('amountPaid').value;
+            if (amountPaidValue && amountPaidValue < 0) {
+                formError.textContent = 'Amount Paid cannot be negative.';
+                return;
+            }
+
+            const record = {
+                customer_name: document.getElementById('customerName').value,
+                customer_email: document.getElementById('customerEmail').value,
+                phone_number: document.getElementById('customerPhone').value,
+                camera_brand: document.getElementById('cameraBrand').value,
+                camera_model: document.getElementById('cameraModel').value,
+                serial_number: document.getElementById('serialNumber').value,
+                service_issue: document.getElementById('serviceIssue').value,
+                received_date: receivedDateValue,
+                delivery_date: deliveryDateValue ? deliveryDateValue : null,
+                status: document.getElementById('status').value,
+                total_amount: totalAmountValue || 0,
+                amount_paid: amountPaidValue || 0
+            };
+
+            console.log('Submitting new record:', record);
+
+            try {
+                console.log('Sending POST to /api/records');
+                const response = await fetch('/api/records', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(record)
+                });
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (response.ok) {
+                    document.getElementById('serviceForm').reset();
+                    formSuccess.textContent = 'Service record added successfully!';
+                    fetchRecords();
+                    fetchDashboardData();
+                } else {
+                    formError.textContent = data.message || 'Error adding record. Please check your input and try again.';
+                    console.error('Error response:', data);
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                formError.textContent = 'Network error. Please try again.';
+            }
+        });
+
+        // Handle CSV upload
+        document.getElementById('csvUploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formError = document.getElementById('csvUploadError');
+            const formSuccess = document.getElementById('csvUploadSuccess');
+            formError.textContent = '';
+            formSuccess.textContent = '';
+
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            if (!file) {
+                formError.textContent = 'Please select a CSV file.';
+                return;
+            }
+
+            if (!file.name.endsWith('.csv')) {
+                formError.textContent = 'File must be a CSV.';
+                return;
+            }
+
+            // Validate CSV headers
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const text = event.target.result;
+                const lines = text.split('\n');
+                if (lines.length < 1) {
+                    formError.textContent = 'CSV file is empty.';
+                    return;
+                }
+
+                const headers = lines[0].split(',').map(header => header.trim().replace(/^"|"$/g, ''));
+                const requiredHeaders = [
+                    'Customer Name', 'Email', 'Phone Number',
+                    'Camera Brand', 'Camera Model', 'Serial Number',
+                    'Service Issue', 'Received Date', 'Status'
+                ];
+                const missingHeaders = requiredHeaders.filter(header => !headers.includes(header));
+                if (missingHeaders.length > 0) {
+                    formError.textContent = `CSV missing required headers: ${missingHeaders.join(', ')}`;
+                    return;
+                }
+
+                // Proceed with upload
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch('/api/upload_csv', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        document.getElementById('csvUploadForm').reset();
+                        formSuccess.textContent = data.message;
+                        fetchRecords();
+                        fetchDashboardData();
+                    } else {
+                        formError.textContent = data.message || 'Error uploading CSV. Please try again.';
+                    }
+                } catch (error) {
+                    formError.textContent = 'Network error. Please try again.';
+                }
+            };
+            reader.onerror = () => {
+                formError.textContent = 'Error reading CSV file.';
+            };
+            reader.readAsText(file);
+        });
+
+        // Download sample CSV
+        document.getElementById('downloadSampleCsv').addEventListener('click', (e) => {
+            e.preventDefault();
+            const sampleCsv = [
+                'Customer ID,Customer Name,Email,Phone Number,Camera Brand,Camera Model,Serial Number,Service Issue,Received Date,Delivery Date,Status,Total Amount,Amount Paid',
+                '"1","Test User","test@example.com","1234567890","Canon","EOS 1200D","TEST12345","Lens replacement","2025-05-07","","Received","0.00","0.00"'
+            ].join('\n');
+            const blob = new Blob([sampleCsv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sample_service_records.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        });
+
+        // Export to CSV
+        async function exportToCSV() {
+            const searchName = document.getElementById('searchName').value;
+            const searchSerial = document.getElementById('searchSerial').value;
+            const searchPhone = document.getElementById('searchPhone').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+            const filterAdmin = currentRole === 'super_admin' ? document.getElementById('filterAdmin').value : '';
+            const query = `/api/records?name=${encodeURIComponent(searchName)}&serial=${encodeURIComponent(searchSerial)}&phone=${encodeURIComponent(searchPhone)}&status=${encodeURIComponent(filterStatus)}${filterAdmin ? `&admin=${encodeURIComponent(filterAdmin)}` : ''}`;
+            const response = await fetch(query);
+            const records = await response.json();
+
+            const headers = ['Customer ID,Customer Name,Email,Phone Number,Camera Brand,Camera Model,Serial Number,Service Issue,Received Date,Delivery Date,Status,Total Amount,Amount Paid' + (currentRole === 'super_admin' ? ',Created By' : '')];
+            const rows = records.map(record => 
+                `"${record.customer_id}","${record.customer_name.replace(/"/g, '""')}","${record.customer_email.replace(/"/g, '""')}","${record.phone_number}","${record.camera_brand.replace(/"/g, '""')}","${record.camera_model.replace(/"/g, '""')}","${record.serial_number.replace(/"/g, '""')}","${record.service_issue.replace(/"/g, '""')}","${record.received_date}","${record.delivery_date || ''}","${record.status}","${record.total_amount ? record.total_amount.toFixed(2) : '0.00'}","${record.amount_paid ? record.amount_paid.toFixed(2) : '0.00'}"${currentRole === 'super_admin' ? `,"${record.admin_username || '-'}"` : ''}`
+            );
+            const csv = headers.concat(rows).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `service_records_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Super Admin Panel Functions
+        async function fetchAdmins() {
+            const response = await fetch('/api/admins');
+            if (response.status === 401) {
+                navigateTo('dashboard');
+                return;
+            }
+            const admins = await response.json();
+            const tableBody = document.getElementById('adminTableBody');
+            tableBody.innerHTML = '';
+            admins.forEach(admin => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${admin.admin_id}</td>
+                    <td>${admin.username}</td>
+                    <td>${admin.role}</td>
+                    <td>${admin.created_at}</td>
+                    <td>
+                        <button class="action-button btn" onclick='editAdmin(${JSON.stringify(admin)})'>Edit</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        document.getElementById('createAdminForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formError = document.getElementById('createAdminError');
+            const formSuccess = document.getElementById('createAdminSuccess');
+            formError.textContent = '';
+            formSuccess.textContent = '';
+
+            const admin = {
+                username: document.getElementById('newAdminUsername').value,
+                password: document.getElementById('newAdminPassword').value
+            };
+
+            try {
+                const response = await fetch('/api/admins', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(admin)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById('createAdminForm').reset();
+                    formSuccess.textContent = 'Admin created successfully!';
+                    fetchAdmins();
+                    fetchAdminsForDropdown(); // Refresh admin dropdown
+                } else {
+                    formError.textContent = data.message || 'Error creating admin. Please try again.';
+                }
+            } catch (error) {
+                formError.textContent = 'Network error. Please try again.';
+            }
+        });
+
+        function editAdmin(admin) {
+            document.getElementById('editAdminId').value = admin.admin_id;
+            document.getElementById('editAdminUsername').value = admin.username;
+            document.getElementById('editAdminPassword').value = '';
+            document.getElementById('editAdminSection').style.display = 'block';
+            document.getElementById('editAdminError').textContent = '';
+            document.getElementById('editAdminSuccess').textContent = '';
+        }
+
+        function cancelEditAdmin() {
+            document.getElementById('editAdminSection').style.display = 'none';
+            document.getElementById('editAdminForm').reset();
+        }
+
+        document.getElementById('editAdminForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formError = document.getElementById('editAdminError');
+            const formSuccess = document.getElementById('editAdminSuccess');
+            formError.textContent = '';
+            formSuccess.textContent = '';
+
+            const adminId = document.getElementById('editAdminId').value;
+            const admin = {
+                username: document.getElementById('editAdminUsername').value,
+                password: document.getElementById('editAdminPassword').value
+            };
+
+            try {
+                const response = await fetch(`/api/admins/${adminId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(admin)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    formSuccess.textContent = 'Admin updated successfully!';
+                    fetchAdmins();
+                    fetchAdminsForDropdown(); // Refresh admin dropdown
+                    setTimeout(() => {
+                        document.getElementById('editAdminSection').style.display = 'none';
+                    }, 1000);
+                } else {
+                    formError.textContent = data.message || 'Error updating admin. Please try again.';
+                }
+            } catch (error) {
+                formError.textContent = 'Network error. Please try again.';
+            }
+        });
+
+        // Initial check
+        checkLogin();
+    </script>
+</body>
+</html>
