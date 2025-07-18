@@ -2,7 +2,7 @@
 
 A modern, secure, and responsive web application for managing camera repair and service operations. Built with a **Flask** backend and a **HTML/CSS/JavaScript** frontend, it offers role-based access for admins and super admins, service record management, CSV uploads, and PDF invoice generation.
 
-![Preview](/preview-images/preview.png)
+![Preview](/preview.png)
 <!-- Replace with your actual screenshot -->
 
 ---
