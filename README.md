@@ -97,17 +97,6 @@ A modern, secure, and responsive web application for managing camera repair and 
 
 ---
 
-## 🖼️ Screenshots
-
-![Dashboard](/preview-images/dashboard.png)
-![Records Table](/preview-images/records.png)
-![Add Record Form](/preview-images/add-record.png)
-![Super Admin Panel](/preview-images/super-admin.png)
-![Invoice PDF](/preview-images/invoice.png)
-<!-- Replace with actual screenshot paths -->
-
----
-
 ## 📬 Contact
 
 **Aswapathy Raj**  
